@@ -66,7 +66,7 @@ export default function AddNewProductPage() {
     
     try {
       setLoading(true);
-      await axios.post(`${API_URL}/api/add-product`, {
+      await axios.post(`${API_URL}/api/products`, {
         ...formData,
         quantityStock: Number(formData.quantityStock),
         mrp: Number(formData.mrp),

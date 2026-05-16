@@ -81,7 +81,6 @@ export default function Profilepage() {
 
   return (
     <div className="profile-page-app">
-      {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="logo-box">
           <img src={logoImg} alt="logo" className="logo-img" />
@@ -102,9 +101,7 @@ export default function Profilepage() {
         </nav>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="main-content">
-        {/* TOPBAR */}
         <header className="topbar">
           <div className="top-left">
             <User size={18} />
@@ -118,10 +115,8 @@ export default function Profilepage() {
           </div>
         </header>
 
-        {/* PROFILE CONTENT */}
         <div className="profile-content-area">
           <div className="profile-card">
-            
             <div className="profile-header">
               <div className="image-upload-wrapper">
                 <img src={profileImage} alt="Profile" className="large-profile-img" />
@@ -139,17 +134,14 @@ export default function Profilepage() {
                 <label>Full Name</label>
                 <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
-              
               <div className="form-group">
                 <label>Email Address</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
-
               <div className="form-group">
                 <label>Mobile Number</label>
                 <input type="text" value={mobile} onChange={(e) => setMobile(e.target.value)} />
               </div>
-
               <div className="profile-actions">
                 <button className="save-btn" onClick={handleSave}>Save Changes</button>
                 <button className="logout-btn" onClick={handleLogout}>

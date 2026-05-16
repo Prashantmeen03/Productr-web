@@ -24,7 +24,7 @@ const Login = () => {
     setError("");
     
     try {
-      const res = await axios.post("${API_URL}/api/login", { email });
+      const res = await axios.post(`${API_URL}/api/login`, { email });
       
       // Navigate to OTP page, passing the email in state so we can verify it
       navigate("/otp", { state: { email, mockOtp: res.data.mockOtp } });

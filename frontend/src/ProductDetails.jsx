@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Home, ShoppingBag, ChevronDown, Plus, Trash2, X } from "lucide-react";
 import axios from "axios";
-import "./ProductsPage.css";
 
 export default function ProductDetails() {
   const navigate = useNavigate();

@@ -38,7 +38,7 @@ const SignupPage = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("${API_URL}/api/signup", { email, name, password, profileImage });
+      const res = await axios.post(`${API_URL}/api/signup`, { email, name, password, profileImage });
       
       // Save image to local storage to persist locally
       localStorage.setItem("profileImage", profileImage);

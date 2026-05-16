@@ -32,7 +32,7 @@ const OtpLogin = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("${API_URL}/api/login", { email });
+      const res = await axios.post(`${API_URL}/api/login`, { email });
       setResendTimer(20);
       
       if (res.data && res.data.mockOtp) {
@@ -87,7 +87,7 @@ const OtpLogin = () => {
 
     try {
       // Send OTP to backend verification API
-      const res = await axios.post("${API_URL}/api/otp", { email, otp: otpValue });
+      const res = await axios.post(`${API_URL}/api/otp`, { email, otp: otpValue });
       
       // Save JWT token
       if (res.data.token) {

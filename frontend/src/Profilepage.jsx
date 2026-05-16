@@ -27,7 +27,7 @@ export default function Profilepage() {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const res = await axios.get("${API_URL}/api/profile", {
+        const res = await axios.get(`${API_URL}/api/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (res.data) {
@@ -58,7 +58,7 @@ export default function Profilepage() {
   const handleSave = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put("${API_URL}/api/profile", {
+      await axios.put(`${API_URL}/api/profile`, {
         name, email, mobile, profileImage
       }, {
         headers: { Authorization: `Bearer ${token}` }

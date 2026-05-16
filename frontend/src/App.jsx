@@ -6,6 +6,7 @@ import OtpLogin from './OtpLogin';
 import HomePage from './HomePage';
 import AddNewProductPage from './AddNewProductPage';
 import Profilepage from './Profilepage';
+import Productpage from './Productpage';
 import ProductDetails from './ProductDetails';
 import './App.css';
 
@@ -18,7 +19,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/otp" element={<OtpLogin />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/products" element={<ProductDetails />} />
+          <Route path="/products" element={<Productpage />} />
           <Route path="/add-product" element={<AddNewProductPage />} />
           <Route path="/profile" element={<Profilepage />} />
           <Route path="/product-details" element={<ProductDetails />} />

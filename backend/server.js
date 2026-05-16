@@ -31,14 +31,19 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/productr')
 
 // Serve Static Files (Frontend)
 const path = require('path');
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+const fs = require('fs');
+const frontendPath = path.join(__dirname, '../frontend/dist');
 
-// API Routes (already defined above)
-
-// Catch-all to serve frontend index.html
-app.get(/.*/, (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-});
+if (fs.existsSync(frontendPath)) {
+  app.use(express.static(frontendPath));
+  app.get(/.*/, (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('Productr API is running...');
+  });
+}
 
 // Server Start
 const PORT = process.env.PORT || 5000;

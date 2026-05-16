@@ -16,8 +16,8 @@ export default function AddNewProductPage() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-// Add images to state
   const [formData, setFormData] = useState({
     productName: "",
     productType: "Foods",
@@ -38,9 +38,7 @@ export default function AddNewProductPage() {
     Promise.all(files.map(file => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (event) => {
-          resolve(event.target.result);
-        };
+        reader.onload = (event) => resolve(event.target.result);
         reader.onerror = (error) => reject(error);
         reader.readAsDataURL(file);
       });
@@ -51,8 +49,6 @@ export default function AddNewProductPage() {
       }));
     });
   };
-
-  const [errors, setErrors] = useState({});
 
   const handleCreate = async () => {
     let newErrors = {};
@@ -77,7 +73,7 @@ export default function AddNewProductPage() {
         sellingPrice: Number(formData.sellingPrice)
       });
       setShowModal(false);
-      navigate("/product-details");
+      navigate("/products");
     } catch (err) {
       console.error("Failed to add product:", err);
       alert("Failed to add product");
@@ -90,7 +86,7 @@ export default function AddNewProductPage() {
     <>
       <style>{`
         *{ margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
-        html, body, #root{ width:100%; min-height:100vh; background:#FFFFFF; }
+        html, body, #root{ width:100%; min-height:100vh; background:#FFFFFF; overflow-x: hidden; }
         .homepage{ width:100%; min-height:100vh; display:grid; grid-template-columns: minmax(220px, 240px) 1fr; background:#FFFFFF; }
         .sidebar{ background:#1D222B; color:#fff; border-right:1px solid #2a3447; display:flex; flex-direction:column; }
         .logo-box{ height:64px; padding:20px 24px; border-bottom:1px solid #2a3447; display:flex; align-items:center; }
@@ -102,8 +98,8 @@ export default function AddNewProductPage() {
         .nav-btn{ width:100%; height:48px; border:none; border-radius:10px; background:transparent; color:#9aa4b2; display:flex; align-items:center; gap:12px; padding:0 16px; font-size:15px; cursor:pointer; transition:0.3s; }
         .nav-btn:hover{ background:#2a3243; color:#fff; }
         .nav-btn.active{ background:#2a3243; color:#fff; }
-        .main-content{ width:100%; display:flex; flex-direction:column; position:relative; }
-        .topbar{ width:100%; height:64px; border-bottom:1px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center; padding:0 30px; }
+        .main-content{ width:100%; display:flex; flex-direction:column; position:relative; height: 100vh; overflow-y: auto; }
+        .topbar{ width:100%; height:64px; border-bottom:1px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center; padding:0 30px; flex-shrink: 0; }
         .profile-box{ display:flex; align-items:center; gap:10px; cursor:pointer; }
         .profile-img{ width:38px; height:38px; border-radius:50%; object-fit:cover; }
         .empty-state{ flex:1; display:flex; justify-content:center; align-items:center; padding:40px; }
@@ -150,7 +146,7 @@ export default function AddNewProductPage() {
             <button className="nav-btn" onClick={() => navigate("/home")}>
               <Home size={18} /> Home
             </button>
-            <button className="nav-btn active" onClick={() => navigate("/product-details")}>
+            <button className="nav-btn active" onClick={() => navigate("/products")}>
               <Package size={18} /> Products
             </button>
           </nav>
@@ -189,7 +185,7 @@ export default function AddNewProductPage() {
               <div className="modal-content">
                 <div className="modal-header">
                   <h2>Add Product</h2>
-                  <button onClick={() => { setShowModal(false); navigate('/product-details'); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+                  <button onClick={() => { setShowModal(false); navigate('/products'); }} style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
                     <X size={24} color="#4b5563" />
                   </button>
                 </div>
@@ -200,7 +196,7 @@ export default function AddNewProductPage() {
                   </div>
                   <div className="form-group-modal">
                     <label>Product Type</label>
-                    <select name="productType" value={formData.productType} onChange={handleChange} style={{ borderColor: errors.productType ? 'red' : '#e5e7eb' }}>
+                    <select name="productType" value={formData.productType} onChange={handleChange}>
                       <option value="Foods">Foods</option>
                       <option value="Electronics">Electronics</option>
                       <option value="Clothing">Clothing</option>
@@ -209,33 +205,33 @@ export default function AddNewProductPage() {
                   </div>
                   <div className="form-group-modal">
                     <label>Quantity Stock</label>
-                    <input name="quantityStock" type="number" value={formData.quantityStock} onChange={handleChange} placeholder={errors.quantityStock ? "Please enter quantity stock" : "Total numbers of Stock available"} style={{ borderColor: errors.quantityStock ? 'red' : '#e5e7eb' }} />
+                    <input name="quantityStock" type="number" value={formData.quantityStock} onChange={handleChange} placeholder="Total numbers of Stock available" />
                   </div>
                   <div className="form-group-modal">
                     <label>MRP</label>
-                    <input name="mrp" type="number" value={formData.mrp} onChange={handleChange} placeholder={errors.mrp ? "Please enter MRP" : "0"} style={{ borderColor: errors.mrp ? 'red' : '#e5e7eb' }} />
+                    <input name="mrp" type="number" value={formData.mrp} onChange={handleChange} placeholder="0" />
                   </div>
                   <div className="form-group-modal">
                     <label>Selling Price</label>
-                    <input name="sellingPrice" type="number" value={formData.sellingPrice} onChange={handleChange} placeholder={errors.sellingPrice ? "Please enter selling price" : "0"} style={{ borderColor: errors.sellingPrice ? 'red' : '#e5e7eb' }} />
+                    <input name="sellingPrice" type="number" value={formData.sellingPrice} onChange={handleChange} placeholder="0" />
                   </div>
                   <div className="form-group-modal">
                     <label>Brand Name</label>
-                    <input name="brandName" value={formData.brandName} onChange={handleChange} placeholder={errors.brandName ? "Please enter brand name" : "Brand"} style={{ borderColor: errors.brandName ? 'red' : '#e5e7eb' }} />
+                    <input name="brandName" value={formData.brandName} onChange={handleChange} placeholder="Brand" />
                   </div>
                   <div className="form-group-modal">
-                    <label>Upload Product Images <span style={{fontSize:'12px', float:'right', color:'#2563EB', cursor:'pointer'}}>Add More Photos</span></label>
-                    <div className="upload-box" style={{ padding: '20px' }}>
+                    <label>Upload Product Images</label>
+                    <div className="upload-box">
                       {formData.images.length > 0 ? (
                         <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '10px' }}>
                           {formData.images.map((img, i) => (
-                            <img key={i} src={img} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #e5e7eb' }} />
+                            <img key={i} src={img} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
                           ))}
                         </div>
                       ) : (
                         <p style={{marginBottom: '10px'}}>Enter Description</p>
                       )}
-                      <label style={{ background: 'transparent', border: '1px solid #2563EB', color: '#2563EB', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'inline-block' }}>
+                      <label style={{ background: 'transparent', border: '1px solid #2563EB', color: '#2563EB', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>
                         Browse
                         <input type="file" multiple accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} />
                       </label>
@@ -250,7 +246,7 @@ export default function AddNewProductPage() {
                   </div>
                 </div>
                 <div className="modal-footer">
-                  <button className="btn-create" onClick={handleCreate} disabled={loading} style={{ opacity: loading ? 0.7 : 1 }}>
+                  <button className="btn-create" onClick={handleCreate} disabled={loading}>
                     {loading ? "Creating..." : "Create"}
                   </button>
                 </div>

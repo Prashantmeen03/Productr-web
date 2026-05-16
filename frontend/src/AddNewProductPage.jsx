@@ -225,7 +225,7 @@ export default function AddNewProductPage() {
                       {formData.images.length > 0 ? (
                         <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '10px' }}>
                           {formData.images.map((img, i) => (
-                            <img key={i} src={img} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} />
+                            <img key={i} src={img} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }} alt="product" />
                           ))}
                         </div>
                       ) : (

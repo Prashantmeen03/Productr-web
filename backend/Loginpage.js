@@ -61,7 +61,11 @@ router.post('/', async (req, res) => {
     res.json({ success: true, message: 'OTP sent successfully.', mockOtp: otp });
   } catch (error) {
     console.error("Login Error:", error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ 
+      error: 'Server error', 
+      details: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

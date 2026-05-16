@@ -41,7 +41,8 @@ if (fs.existsSync(frontendPath)) {
   });
 } else {
   app.get('/', (req, res) => {
-    res.send('Productr API is running...');
+    const dbStatus = mongoose.connection.readyState === 1 ? "Connected" : "Disconnected";
+    res.send(`Productr API is running... (Database: ${dbStatus})`);
   });
 }
 

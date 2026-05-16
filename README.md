@@ -1,5 +1,9 @@
 # Productr E-Commerce Platform
 
+🌐 **Live Demo (Frontend):** [https://prashantmeen03.github.io/Productr-web/](https://prashantmeen03.github.io/Productr-web/)
+
+*(Note: The GitHub Pages demo hosts the frontend only. For full functionality, you will need to run the Node.js backend locally alongside it).*
+
 A full-stack e-commerce dashboard featuring a dynamic Vite + React frontend and a Node.js + Express backend using MongoDB.
 
 ## 🛠️ Required Environment Variables

@@ -3,7 +3,8 @@
 // For Render (Unified): ""
 // For Render (Separate): "https://productr-web.onrender.com"
 
-export const API_URL = ""; // Unified deployment on Render
+export const API_URL = "https://productr-web.onrender.com"; // Live Render Backend
+
 
 
 

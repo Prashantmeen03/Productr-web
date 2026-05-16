@@ -7,7 +7,7 @@ import "./LoginPage.css";
 import axios from "axios";
 
 const Login = () => {
-  const [email, setEmail] = useState("Acme@gmail.com");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -22,11 +22,10 @@ const Login = () => {
     setError("");
     
     try {
-      // Call our newly built backend API
-      await axios.post("http://localhost:5000/api/login", { email });
+      const res = await axios.post("http://localhost:5000/api/login", { email });
       
       // Navigate to OTP page, passing the email in state so we can verify it
-      navigate("/otp", { state: { email } });
+      navigate("/otp", { state: { email, mockOtp: res.data.mockOtp } });
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || "Failed to send OTP. Please try again.");
@@ -57,7 +56,7 @@ const Login = () => {
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email or phone number"
+                placeholder="Acme@gmail.com"
                 style={{ borderColor: error ? "red" : undefined }}
               />
               {error && <p style={{ color: "red", fontSize: "14px", marginTop: "5px" }}>{error}</p>}
@@ -75,7 +74,7 @@ const Login = () => {
 
           <div className="signup-box">
             <p>Don't have a Productr Account</p>
-            <a href="/">SignUp Here</a>
+            <a href="/signup">SignUp Here</a>
           </div>
 
         </div>

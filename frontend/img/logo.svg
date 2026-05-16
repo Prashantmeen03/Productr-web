@@ -1,0 +1,19 @@
+<svg width="240" height="60" viewBox="0 0 240 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Text -->
+  <text x="0" y="42" font-family="'Inter', 'Segoe UI', Arial, sans-serif" font-weight="900" font-size="34" fill="#FFFFFF" letter-spacing="-0.5">Productr</text>
+  
+  <!-- Icon: Overlapping concentric circles -->
+  <g transform="translate(175, 30)">
+    <!-- Left circles -->
+    <circle cx="-14" cy="0" r="8" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+    <circle cx="-14" cy="0" r="14" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+    <circle cx="-14" cy="0" r="20" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+    <circle cx="-14" cy="0" r="26" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+    
+    <!-- Right circles -->
+    <circle cx="14" cy="0" r="8" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+    <circle cx="14" cy="0" r="14" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+    <circle cx="14" cy="0" r="20" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+    <circle cx="14" cy="0" r="26" fill="none" stroke="#FA5A15" stroke-width="2.5"/>
+  </g>
+</svg>

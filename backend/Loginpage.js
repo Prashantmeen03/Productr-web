@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('./models/User');
 const nodemailer = require('nodemailer');
+const twilio = require('twilio');
 
 // POST /api/login - Generate and send OTP
 router.post('/', async (req, res) => {
@@ -21,29 +22,43 @@ router.post('/', async (req, res) => {
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
-
-    // In a real application, you'd configure nodemailer with your SMTP details here:
-    /*
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
-    });
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Your Login OTP',
-      text: `Your OTP is ${otp}. It expires in 10 minutes.`
-    });
-    */
     
-    // For now, we log it to the console so you can test without an SMTP server
-    console.log(`\n================================`);
-    console.log(`[MOCK EMAIL SENT TO ${email}]`);
-    console.log(`SUBJECT: Your Productr Login OTP`);
-    console.log(`OTP: ${otp}`);
-    console.log(`================================\n`);
+    const isEmail = email.includes('@');
 
-    res.json({ success: true, message: 'OTP sent successfully. Check backend console.' });
+    if (isEmail) {
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+        });
+        await transporter.sendMail({
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: 'Your Login OTP',
+          text: `Your OTP is ${otp}. It expires in 10 minutes.`
+        });
+      }
+      console.log(`\n================================`);
+      console.log(`[EMAIL SENT TO ${email}]`);
+      console.log(`SUBJECT: Your Productr Login OTP`);
+      console.log(`OTP: ${otp}`);
+      console.log(`================================\n`);
+    } else {
+      if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+        const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        await client.messages.create({
+          body: `Your Productr Login OTP is ${otp}. It expires in 10 minutes.`,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: email.startsWith('+') ? email : `+${email}`
+        });
+      }
+      console.log(`\n================================`);
+      console.log(`[SMS SENT TO ${email}]`);
+      console.log(`MESSAGE: Your Productr Login OTP is ${otp}`);
+      console.log(`================================\n`);
+    }
+
+    res.json({ success: true, message: 'OTP sent successfully.', mockOtp: otp });
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ error: 'Server error' });

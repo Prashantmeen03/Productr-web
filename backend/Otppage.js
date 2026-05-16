@@ -16,9 +16,10 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Invalid or expired OTP' });
     }
 
-    // Clear OTP
+    // Clear OTP and mark as verified
     user.otp = undefined;
     user.otpExpires = undefined;
+    user.isVerified = true;
     await user.save();
 
     // Generate Token

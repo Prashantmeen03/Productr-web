@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Home,
-  ShoppingBag,
-  Search,
-  ChevronDown,
-  Plus,
-  Trash2,
-  X
-} from "lucide-react";
+import { Search, Home, ShoppingBag, ChevronDown, Plus, Trash2, X } from "lucide-react";
 import axios from "axios";
-import "./HomePage.css";
+import "./ProductsPage.css";
 
-export default function HomePage() {
+export default function ProductDetails() {
   const navigate = useNavigate();
-
-  const [activeTab, setActiveTab] = useState("Published");
   const profileImage = localStorage.getItem("profileImage") || "https://i.pravatar.cc/150";
 
   const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState(null);
+  
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
 
@@ -97,20 +89,27 @@ export default function HomePage() {
     });
   };
 
-  const publishedProducts = products.filter(p => p.isPublished);
-  const unpublishedProducts = products.filter(p => !p.isPublished);
-
-  const displayedProducts = activeTab === "Published" ? publishedProducts : unpublishedProducts;
+  const displayedProducts = products.filter(p => 
+    p.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.brandName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.productType?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
       <style>{`
+        .products-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          margin-bottom: 24px;
+        }
         .products-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
           gap: 24px;
           width: 100%;
-          padding: 24px;
         }
         .product-card {
           background: #fff;
@@ -193,6 +192,7 @@ export default function HomePage() {
           justify-content: center;
           cursor: pointer;
         }
+        
         .modal-overlay {
           position: fixed;
           top: 0; left: 0; right: 0; bottom: 0;
@@ -232,60 +232,62 @@ export default function HomePage() {
         .modal-footer { border-top: 1px solid #e5e7eb; padding: 20px 24px; display: flex; justify-content: flex-end; }
         .btn-blue { background: #2563EB; color: white; padding: 10px 24px; border-radius: 8px; font-weight: 500; border: none; cursor: pointer; }
       `}</style>
-      <div className="homepage">
+      <div className="app">
         <aside className="sidebar">
-          <div className="logo-box">
-            <img src="/img/logo.svg" alt="logo" className="logo-img" />
+          <div className="logo">
+            <img src="/img/logo.svg" alt="logo" />
           </div>
           <div className="search-wrapper">
             <div className="search-box">
-              <Search size={18} />
+              <Search size={16} />
               <input type="text" placeholder="Search" />
             </div>
           </div>
-          <nav className="nav-links">
-            <button className="nav-btn active">
+          <div className="nav">
+            <button className="nav-btn" onClick={() => navigate("/home")}>
               <Home size={18} /> Home
             </button>
-            <button className="nav-btn" onClick={() => navigate("/product-details")}>
+            <button className="nav-btn active">
               <ShoppingBag size={18} /> Products
             </button>
-          </nav>
+          </div>
         </aside>
 
-        <main className="main-content">
-          <header className="topbar">
+        <main className="main">
+          <div className="topbar">
             <div className="top-left">
-              <Home size={18} />
-              <span>Home</span>
+              <ShoppingBag size={16} />
+              <span>Products</span>
             </div>
-            <div className="top-right">
+            <div className="top-right" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div style={{ background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Search size={16} color="#6b7280" />
+                <input 
+                  type="text" 
+                  placeholder="Search products..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: '14px', width: '250px', color: '#111827' }}
+                />
+              </div>
               <div className="profile-box" onClick={() => navigate('/profile')}>
                 <img src={profileImage} alt="profile" className="profile-img" />
                 <ChevronDown size={18} />
               </div>
             </div>
-          </header>
-
-          <div className="tabs">
-            <button
-              className={`tab-btn ${activeTab === "Published" ? "tab-active" : ""}`}
-              onClick={() => setActiveTab("Published")}
-            >
-              Published
-            </button>
-            <button
-              className={`tab-btn ${activeTab === "Unpublished" ? "tab-active" : ""}`}
-              onClick={() => setActiveTab("Unpublished")}
-            >
-              Unpublished
-            </button>
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto' }}>
+          <div className="content" style={{ display: 'block', padding: '30px', overflowY: 'auto' }}>
+            <div className="products-header">
+              <h2 style={{ fontSize: '24px', color: '#1f2937', fontWeight: '600' }}>Products</h2>
+              <button onClick={() => navigate('/add-product')} style={{ background: 'transparent', border: 'none', color: '#6b7280', fontSize: '16px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <Plus size={20} /> Add Products
+              </button>
+            </div>
+
             {displayedProducts.length > 0 ? (
               <div className="products-grid">
-                {displayedProducts.map((p) => (
+                {displayedProducts.map(p => (
                   <div key={p._id} className="product-card">
                     <div className="product-image-container">
                       <img src={p.images && p.images.length > 0 ? p.images[0] : "https://via.placeholder.com/150"} alt="product" />
@@ -314,16 +316,17 @@ export default function HomePage() {
                 ))}
               </div>
             ) : (
-              <section className="empty-state">
-                <div className="empty-content">
-                  <div className="icon-wrapper">
-                    <div className="square top-left"></div>
-                    <div className="square top-right"></div>
-                    <div className="square bottom-left"></div>
-                    <div className="plus-icon"><Plus size={34} strokeWidth={3.5} /></div>
+              <section className="empty-state" style={{flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px', marginTop: '60px'}}>
+                <div className="empty-content" style={{textAlign: 'center'}}>
+                  <div className="icon-wrapper" style={{width: '90px', height: '90px', margin: '0 auto 30px', position: 'relative'}}>
+                    <div className="square top-left" style={{width: '28px', height: '28px', border: '5px solid #101b8c', borderRadius: '6px', position: 'absolute', top: 0, left: 0}}></div>
+                    <div className="square top-right" style={{width: '28px', height: '28px', border: '5px solid #101b8c', borderRadius: '6px', position: 'absolute', top: 0, right: 0}}></div>
+                    <div className="square bottom-left" style={{width: '28px', height: '28px', border: '5px solid #101b8c', borderRadius: '6px', position: 'absolute', bottom: 0, left: 0}}></div>
+                    <div className="plus-icon" style={{position: 'absolute', right: 0, bottom: 0, color: '#101b8c'}}><Plus size={34} strokeWidth={3.5} /></div>
                   </div>
-                  <h2>{activeTab === "Published" ? "No Published Products" : "No Unpublished Products"}</h2>
-                  <p>Your {activeTab} Products will appear here<br />Create your first product to publish</p>
+                  <h2 style={{fontSize: 'clamp(28px,4vw,42px)', color: '#374151', marginBottom: '18px', fontWeight: 700}}>Feels a little empty over here...</h2>
+                  <p style={{color: '#b0b7c3', fontSize: 'clamp(15px,2vw,18px)', lineHeight: 1.7}}>You can create products without connecting store<br />you can add products to store anytime</p>
+                  <button className="add-product-btn" onClick={() => navigate('/add-product')} style={{marginTop: '30px', padding: '14px 40px', background: '#101b8c', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 600, fontSize: '16px', cursor: 'pointer', transition: '0.2s'}}>Add your Products</button>
                 </div>
               </section>
             )}

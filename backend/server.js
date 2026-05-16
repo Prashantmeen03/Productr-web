@@ -22,6 +22,7 @@ app.use('/api/add-product', addNewProductRoute);
 app.use('/api/login', loginRoute);
 app.use('/api/otp', otpRoute);
 app.use('/api/signup', signupRoute);
+app.use('/api/profile', require('./Profilepage'));
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/productr')

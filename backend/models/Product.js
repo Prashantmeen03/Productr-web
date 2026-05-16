@@ -9,7 +9,8 @@ const productSchema = new mongoose.Schema({
   brandName: { type: String, required: true },
   description: { type: String },
   returnEligibility: { type: String, enum: ['Yes', 'No'], default: 'Yes' },
-  isPublished: { type: Boolean, default: false }
+  isPublished: { type: Boolean, default: false },
+  images: { type: [String], default: [] }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

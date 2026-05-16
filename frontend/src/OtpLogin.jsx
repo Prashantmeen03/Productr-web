@@ -1,16 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./OtpLogin.css";
 import axios from "axios";
 
 const OtpLogin = () => {
-  const [otp, setOtp] = useState(["1", "", "", "", "", ""]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email || "Acme@gmail.com";
+  
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showNotification, setShowNotification] = useState(false);
+  const [resendTimer, setResendTimer] = useState(20);
+
+  useEffect(() => {
+    let interval = null;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
+
+  const handleResend = async () => {
+    if (resendTimer > 0) return;
+    
+    setLoading(true);
+    setError("");
+    try {
+      const res = await axios.post("http://localhost:5000/api/login", { email });
+      setResendTimer(20);
+      
+      if (res.data && res.data.mockOtp) {
+         location.state.mockOtp = res.data.mockOtp;
+         setShowNotification(false);
+         setTimeout(() => setShowNotification(true), 1000);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to resend OTP.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (location.state?.mockOtp) {
+      // Simulate network delay for receiving message
+      const timer = setTimeout(() => {
+        setShowNotification(true);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   const handleChange = (value, index) => {
     if (/^[0-9]?$/.test(value)) {
@@ -51,8 +96,8 @@ const OtpLogin = () => {
       navigate("/home");
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || "Invalid OTP. Please try again.");
-      navigate("/otp-entered"); // The original flow goes here on fail/success mock
+      setError("This is not a valid OTP");
+      setOtp(["", "", "", "", "", ""]); // Clear OTP on fail so user can re-type
     } finally {
       setLoading(false);
     }
@@ -107,8 +152,13 @@ const OtpLogin = () => {
             </button>
 
             <div className="resend-text">
-              Didnt recive OTP ?
-              <span> Resend in 20s</span>
+              Didnt receive OTP ?
+              <span 
+                onClick={handleResend} 
+                style={{ cursor: resendTimer === 0 ? "pointer" : "default", opacity: resendTimer === 0 ? 1 : 0.6 }}
+              >
+                {resendTimer > 0 ? ` Resend in ${resendTimer}s` : " Resend Now"}
+              </span>
             </div>
 
           </div>
@@ -116,6 +166,19 @@ const OtpLogin = () => {
         </div>
 
       </div>
+
+      {/* NOTIFICATION TOAST */}
+      {showNotification && location.state?.mockOtp && (
+        <div className="otp-notification slide-in">
+          <div className="notification-icon">💬</div>
+          <div className="notification-content">
+            <h4>New Message</h4>
+            <p>Your Productr OTP is: <strong>{location.state.mockOtp}</strong></p>
+          </div>
+          <button className="close-notification" onClick={() => setShowNotification(false)}>×</button>
+        </div>
+      )}
+
     </div>
   );
 };

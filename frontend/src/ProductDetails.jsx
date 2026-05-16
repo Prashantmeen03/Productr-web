@@ -1,3 +1,4 @@
+import { API_URL } from './config';
 import logoImg from "./assets/img/logo.svg";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +20,7 @@ export default function ProductDetails() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products");
+      const res = await axios.get("${API_URL}/api/products");
       setProducts(res.data.data);
     } catch (err) {
       console.error(err);
@@ -37,7 +38,7 @@ export default function ProductDetails() {
 
   const confirmDelete = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/products/${deleteData._id}`);
+      await axios.delete(`${API_URL}/api/products/${deleteData._id}`);
       setShowDeleteModal(false);
       fetchProducts();
     } catch (err) {
@@ -56,7 +57,7 @@ export default function ProductDetails() {
 
   const confirmEdit = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/products/${editData._id}`, editData);
+      await axios.put(`${API_URL}/api/products/${editData._id}`, editData);
       setShowEditModal(false);
       fetchProducts();
     } catch (err) {
@@ -66,7 +67,7 @@ export default function ProductDetails() {
 
   const togglePublish = async (p) => {
     try {
-      await axios.put(`http://localhost:5000/api/products/${p._id}`, { ...p, isPublished: !p.isPublished });
+      await axios.put(`${API_URL}/api/products/${p._id}`, { ...p, isPublished: !p.isPublished });
       fetchProducts();
     } catch (err) {
       console.error(err);

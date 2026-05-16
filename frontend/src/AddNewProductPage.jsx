@@ -1,3 +1,4 @@
+import { API_URL } from './config';
 import logoImg from "./assets/img/logo.svg";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -69,7 +70,7 @@ export default function AddNewProductPage() {
     
     try {
       setLoading(true);
-      await axios.post("http://localhost:5000/api/add-product", {
+      await axios.post("${API_URL}/api/add-product", {
         ...formData,
         quantityStock: Number(formData.quantityStock),
         mrp: Number(formData.mrp),

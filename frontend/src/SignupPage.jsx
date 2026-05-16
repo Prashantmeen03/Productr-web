@@ -1,3 +1,4 @@
+import { API_URL } from './config';
 import loginBg from "./assets/img/login.png";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -37,7 +38,7 @@ const SignupPage = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post("http://localhost:5000/api/signup", { email, name, password, profileImage });
+      const res = await axios.post("${API_URL}/api/signup", { email, name, password, profileImage });
       
       // Save image to local storage to persist locally
       localStorage.setItem("profileImage", profileImage);

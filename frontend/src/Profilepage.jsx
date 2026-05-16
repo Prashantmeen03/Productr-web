@@ -1,6 +1,6 @@
 import { API_URL } from './config';
 import logoImg from "./assets/img/logo.svg";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home,
@@ -49,9 +49,13 @@ export default function Profilepage() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
-      localStorage.setItem("profileImage", imageUrl);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target.result;
+        setProfileImage(base64);
+        localStorage.setItem("profileImage", base64);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -63,7 +67,7 @@ export default function Profilepage() {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      alert("Profile Saved to Database Successfully!");
+      alert("Profile Saved Successfully!");
     } catch (err) {
       console.error(err);
       alert("Failed to save profile.");
@@ -107,7 +111,7 @@ export default function Profilepage() {
             <span>Profile</span>
           </div>
           <div className="top-right">
-            <div className="profile-box">
+            <div className="profile-box" onClick={() => navigate('/profile')}>
               <img src={profileImage} alt="profile" className="profile-img" />
               <ChevronDown size={18} />
             </div>
@@ -124,9 +128,9 @@ export default function Profilepage() {
                 <label htmlFor="file-upload" className="upload-btn">
                   <Camera size={18} color="#fff" />
                 </label>
-                <input id="file-upload" type="file" accept="image/*" onChange={handleImageUpload} />
+                <input id="file-upload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
               </div>
-              <h2 className="profile-name">{name}</h2>
+              <h2 className="profile-name">{name || "User Name"}</h2>
               <p className="profile-subtitle">Manage your personal information</p>
             </div>
 

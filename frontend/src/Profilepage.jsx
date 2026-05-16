@@ -1,41 +1,76 @@
 import logoImg from "./assets/img/logo.svg";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home, ShoppingBag, Search, ChevronDown, Camera, LogOut, User } from "lucide-react";
+import {
+  Home,
+  ShoppingBag,
+  Search,
+  ChevronDown,
+  Camera,
+  LogOut,
+  User
+} from "lucide-react";
 import "./Profilepage.css";
-import { getCurrentUser, saveProfile, logout } from "./store";
+import axios from "axios";
 
 export default function Profilepage() {
   const navigate = useNavigate();
-  const user = getCurrentUser();
 
-  const [name, setName] = useState(user?.name || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [mobile, setMobile] = useState(user?.mobile || "");
-  const [profileImage, setProfileImage] = useState(
-    user?.profileImage || localStorage.getItem("profileImage") || "https://i.pravatar.cc/150"
-  );
-  const [saved, setSaved] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [profileImage, setProfileImage] = useState(localStorage.getItem("profileImage") || "https://i.pravatar.cc/150");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const res = await axios.get("http://localhost:5000/api/profile", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.data) {
+          if (res.data.name) setName(res.data.name);
+          if (res.data.email) setEmail(res.data.email);
+          if (res.data.mobile) setMobile(res.data.mobile);
+          if (res.data.profileImage) {
+            setProfileImage(res.data.profileImage);
+            localStorage.setItem("profileImage", res.data.profileImage);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load profile", err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setProfileImage(ev.target.result);
-      localStorage.setItem("profileImage", ev.target.result);
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setProfileImage(imageUrl);
+      localStorage.setItem("profileImage", imageUrl);
+    }
   };
 
-  const handleSave = () => {
-    saveProfile({ name, email, mobile, profileImage });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put("http://localhost:5000/api/profile", {
+        name, email, mobile, profileImage
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("Profile Saved to Database Successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save profile.");
+    }
   };
 
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem("token");
     navigate("/");
   };
 
@@ -56,14 +91,15 @@ export default function Profilepage() {
           <button className="nav-btn" onClick={() => navigate("/home")}>
             <Home size={18} /> Home
           </button>
-          <button className="nav-btn" onClick={() => navigate("/product-details")}>
+          <button className="nav-btn" onClick={() => navigate("/products")}>
             <ShoppingBag size={18} /> Products
           </button>
         </nav>
       </aside>
 
-      {/* MAIN */}
+      {/* MAIN CONTENT */}
       <main className="main-content">
+        {/* TOPBAR */}
         <header className="topbar">
           <div className="top-left">
             <User size={18} />
@@ -77,17 +113,19 @@ export default function Profilepage() {
           </div>
         </header>
 
+        {/* PROFILE CONTENT */}
         <div className="profile-content-area">
           <div className="profile-card">
+            
             <div className="profile-header">
               <div className="image-upload-wrapper">
                 <img src={profileImage} alt="Profile" className="large-profile-img" />
                 <label htmlFor="file-upload" className="upload-btn">
                   <Camera size={18} color="#fff" />
                 </label>
-                <input id="file-upload" type="file" accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} />
+                <input id="file-upload" type="file" accept="image/*" onChange={handleImageUpload} />
               </div>
-              <h2 className="profile-name">{name || "Your Name"}</h2>
+              <h2 className="profile-name">{name}</h2>
               <p className="profile-subtitle">Manage your personal information</p>
             </div>
 
@@ -96,18 +134,19 @@ export default function Profilepage() {
                 <label>Full Name</label>
                 <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
+              
               <div className="form-group">
                 <label>Email Address</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
               </div>
+
               <div className="form-group">
                 <label>Mobile Number</label>
                 <input type="text" value={mobile} onChange={(e) => setMobile(e.target.value)} />
               </div>
+
               <div className="profile-actions">
-                <button className="save-btn" onClick={handleSave}>
-                  {saved ? "✓ Saved!" : "Save Changes"}
-                </button>
+                <button className="save-btn" onClick={handleSave}>Save Changes</button>
                 <button className="logout-btn" onClick={handleLogout}>
                   <LogOut size={18} />
                   Logout

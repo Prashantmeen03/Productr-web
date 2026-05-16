@@ -10,9 +10,8 @@ import {
   Trash2,
   X
 } from "lucide-react";
+import axios from "axios";
 import "./HomePage.css";
-import { fetchProducts, updateProduct, deleteProduct } from "./store";
-
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -26,16 +25,17 @@ export default function HomePage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
 
-  const loadProducts = () => {
+  const fetchProducts = async () => {
     try {
-      setProducts(fetchProducts());
+      const res = await axios.get("http://localhost:5000/api/products");
+      setProducts(res.data.data);
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    loadProducts();
+    fetchProducts();
   }, []);
 
   const handleDeleteClick = (p) => {
@@ -43,11 +43,11 @@ export default function HomePage() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     try {
-      deleteProduct(deleteData._id);
+      await axios.delete(`http://localhost:5000/api/products/${deleteData._id}`);
       setShowDeleteModal(false);
-      loadProducts();
+      fetchProducts();
     } catch (err) {
       console.error(err);
     }
@@ -62,20 +62,20 @@ export default function HomePage() {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
-  const confirmEdit = () => {
+  const confirmEdit = async () => {
     try {
-      updateProduct(editData._id, editData);
+      await axios.put(`http://localhost:5000/api/products/${editData._id}`, editData);
       setShowEditModal(false);
-      loadProducts();
+      fetchProducts();
     } catch (err) {
       console.error(err);
     }
   };
 
-  const togglePublish = (p) => {
+  const togglePublish = async (p) => {
     try {
-      updateProduct(p._id, { ...p, isPublished: !p.isPublished });
-      loadProducts();
+      await axios.put(`http://localhost:5000/api/products/${p._id}`, { ...p, isPublished: !p.isPublished });
+      fetchProducts();
     } catch (err) {
       console.error(err);
     }

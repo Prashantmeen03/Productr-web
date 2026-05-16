@@ -1,3 +1,4 @@
+import loginBg from "./assets/img/login.png";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
@@ -56,7 +57,7 @@ const SignupPage = () => {
 
         {/* LEFT PANEL */}
         <div className="left-panel">
-          <img src="img/login.png" alt="background" className="left-panel-bg" />
+          <img src={loginBg} alt="background" className="left-panel-bg" />
         </div>
 
         {/* RIGHT PANEL */}

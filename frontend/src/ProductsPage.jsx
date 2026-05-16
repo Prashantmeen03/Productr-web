@@ -1,3 +1,4 @@
+import logoImg from "./assets/img/logo.svg";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -22,7 +23,7 @@ export default function ProductsPage() {
 
         <div className="logo">
           <img
-            src="/img/logo.svg"
+            src={logoImg}
             alt="logo"
           />
         </div>

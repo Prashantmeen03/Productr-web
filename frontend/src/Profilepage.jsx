@@ -1,3 +1,4 @@
+import logoImg from "./assets/img/logo.svg";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -78,7 +79,7 @@ export default function Profilepage() {
       {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="logo-box">
-          <img src="/img/logo.svg" alt="logo" className="logo-img" />
+          <img src={logoImg} alt="logo" className="logo-img" />
         </div>
         <div className="search-wrapper">
           <div className="search-box">

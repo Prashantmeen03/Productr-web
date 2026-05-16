@@ -1,3 +1,4 @@
+import logoImg from "./assets/img/logo.svg";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -235,7 +236,7 @@ export default function HomePage() {
       <div className="homepage">
         <aside className="sidebar">
           <div className="logo-box">
-            <img src="/img/logo.svg" alt="logo" className="logo-img" />
+            <img src={logoImg} alt="logo" className="logo-img" />
           </div>
           <div className="search-wrapper">
             <div className="search-box">

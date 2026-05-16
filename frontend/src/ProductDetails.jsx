@@ -1,3 +1,4 @@
+import logoImg from "./assets/img/logo.svg";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Home, ShoppingBag, ChevronDown, Plus, Trash2, X } from "lucide-react";
@@ -235,7 +236,7 @@ export default function ProductDetails() {
       <div className="app">
         <aside className="sidebar">
           <div className="logo">
-            <img src="/img/logo.svg" alt="logo" />
+            <img src={logoImg} alt="logo" />
           </div>
           <div className="search-wrapper">
             <div className="search-box">

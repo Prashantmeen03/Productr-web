@@ -1,3 +1,4 @@
+import loginBg from "./assets/img/login.png";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./OtpLogin.css";
@@ -109,7 +110,7 @@ const OtpLogin = () => {
 
         {/* LEFT PANEL */}
         <div className="left-panel">
-          <img src="img/login.png" alt="background" className="left-panel-bg" />
+          <img src={loginBg} alt="background" className="left-panel-bg" />
         </div>
 
         {/* RIGHT PANEL */}

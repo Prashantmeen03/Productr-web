@@ -2,10 +2,7 @@ import loginBg from "./assets/img/login.png";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LoginPage.css";
-
-
-
-import axios from "axios";
+import { sendOtp } from "./store";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,56 +10,48 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    if (!email) {
-      setError("Please enter your email or phone number");
+  const handleLogin = () => {
+    if (!email.trim()) {
+      setError("Please enter your email address");
       return;
     }
-    
     setLoading(true);
     setError("");
-    
     try {
-      const res = await axios.post("http://localhost:5000/api/login", { email });
-      
-      // Navigate to OTP page, passing the email in state so we can verify it
-      navigate("/otp", { state: { email, mockOtp: res.data.mockOtp } });
+      const mockOtp = sendOtp(email.trim());
+      navigate("/otp", { state: { email: email.trim(), mockOtp } });
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.error || "Failed to send OTP. Please try again.");
+      setError(err.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleLogin();
+  };
+
   return (
     <div className="login-page">
       <div className="container">
-
-        {/* LEFT PANEL */}
         <div className="left-panel">
           <img src={loginBg} alt="background" className="left-panel-bg" />
         </div>
-
-        {/* RIGHT PANEL */}
         <div className="right-panel">
-
           <div className="login-box">
             <h1>Login to your Productr Account</h1>
-
             <div className="form-group">
-              <label>Email or Phone number</label>
-
+              <label>Email address</label>
               <input
-                type="text"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Acme@gmail.com"
                 style={{ borderColor: error ? "red" : undefined }}
               />
               {error && <p style={{ color: "red", fontSize: "14px", marginTop: "5px" }}>{error}</p>}
             </div>
-
             <button
               className="login-btn"
               onClick={handleLogin}
@@ -72,12 +61,10 @@ const Login = () => {
               {loading ? "Sending OTP..." : "Login"}
             </button>
           </div>
-
           <div className="signup-box">
             <p>Don't have a Productr Account</p>
-            <a href="/signup">SignUp Here</a>
+            <a href="#/signup">SignUp Here</a>
           </div>
-
         </div>
       </div>
     </div>

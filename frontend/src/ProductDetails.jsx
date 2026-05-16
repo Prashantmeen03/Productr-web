@@ -2,8 +2,8 @@ import logoImg from "./assets/img/logo.svg";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Home, ShoppingBag, ChevronDown, Plus, Trash2, X } from "lucide-react";
-import axios from "axios";
-import "./ProductsPage.css";
+import { fetchProducts, updateProduct, deleteProduct } from "./store";
+
 
 export default function ProductDetails() {
   const navigate = useNavigate();
@@ -17,17 +17,16 @@ export default function ProductDetails() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
 
-  const fetchProducts = async () => {
+  const loadProducts = () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products");
-      setProducts(res.data.data);
+      setProducts(fetchProducts());
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    loadProducts();
   }, []);
 
   const handleDeleteClick = (p) => {
@@ -35,11 +34,11 @@ export default function ProductDetails() {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     try {
-      await axios.delete(`http://localhost:5000/api/products/${deleteData._id}`);
+      deleteProduct(deleteData._id);
       setShowDeleteModal(false);
-      fetchProducts();
+      loadProducts();
     } catch (err) {
       console.error(err);
     }
@@ -54,20 +53,20 @@ export default function ProductDetails() {
     setEditData({ ...editData, [e.target.name]: e.target.value });
   };
 
-  const confirmEdit = async () => {
+  const confirmEdit = () => {
     try {
-      await axios.put(`http://localhost:5000/api/products/${editData._id}`, editData);
+      updateProduct(editData._id, editData);
       setShowEditModal(false);
-      fetchProducts();
+      loadProducts();
     } catch (err) {
       console.error(err);
     }
   };
 
-  const togglePublish = async (p) => {
+  const togglePublish = (p) => {
     try {
-      await axios.put(`http://localhost:5000/api/products/${p._id}`, { ...p, isPublished: !p.isPublished });
-      fetchProducts();
+      updateProduct(p._id, { ...p, isPublished: !p.isPublished });
+      loadProducts();
     } catch (err) {
       console.error(err);
     }

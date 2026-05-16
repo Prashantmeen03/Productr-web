@@ -24,6 +24,14 @@ app.use('/api/otp', otpRoute);
 app.use('/api/signup', signupRoute);
 app.use('/api/profile', require('./Profilepage'));
 
+// Serve frontend static files
+const path = require('path');
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
+
 // Database Connection
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/productr')
 .then(() => console.log('MongoDB connected successfully'))
@@ -34,3 +42,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;

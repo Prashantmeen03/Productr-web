@@ -80,7 +80,8 @@ export default function AddNewProductPage() {
         ...formData,
         quantityStock: Number(formData.quantityStock),
         mrp: Number(formData.mrp),
-        sellingPrice: Number(formData.sellingPrice)
+        sellingPrice: Number(formData.sellingPrice),
+        isPublished: true
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });

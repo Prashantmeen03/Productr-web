@@ -27,7 +27,21 @@ app.use('/api/profile', require('./Profilepage'));
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/productr')
-.then(() => console.log('MongoDB connected successfully'))
+.then(() => {
+  console.log('MongoDB connected successfully');
+  // Dynamic cleanup: Drop all legacy unique indexes except _id and email_1
+  mongoose.connection.db.collection('users').indexes()
+    .then(indexes => {
+      indexes.forEach(idx => {
+        if (idx.name !== '_id_' && idx.name !== 'email_1') {
+          mongoose.connection.db.collection('users').dropIndex(idx.name)
+            .then(() => console.log(`Successfully dropped defunct unique index: ${idx.name}`))
+            .catch(err => console.log(`Could not drop defunct unique index ${idx.name}:`, err.message));
+        }
+      });
+    })
+    .catch(err => console.error('Error fetching collection indexes:', err));
+})
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Serve Static Files (Frontend)

@@ -21,6 +21,7 @@ export default function HomePage() {
   const profileImage = localStorage.getItem("profileImage") || "https://i.pravatar.cc/150";
 
   const [products, setProducts] = useState([]);
+  const [carouselIndices, setCarouselIndices] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -28,7 +29,10 @@ export default function HomePage() {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/products`);
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${API_URL}/api/products`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setProducts(res.data.data);
     } catch (err) {
       console.error(err);
@@ -46,11 +50,15 @@ export default function HomePage() {
 
   const confirmDelete = async () => {
     try {
-      await axios.delete(`${API_URL}/api/products/${deleteData._id}`);
+      const token = localStorage.getItem("token");
+      await axios.delete(`${API_URL}/api/products/${deleteData._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setShowDeleteModal(false);
       fetchProducts();
     } catch (err) {
       console.error(err);
+      alert("Failed to delete product: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -65,7 +73,10 @@ export default function HomePage() {
 
   const confirmEdit = async () => {
     try {
-      await axios.put(`${API_URL}/api/products/${editData._id}`, editData);
+      const token = localStorage.getItem("token");
+      await axios.put(`${API_URL}/api/products/${editData._id}`, editData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setShowEditModal(false);
       fetchProducts();
     } catch (err) {
@@ -75,7 +86,11 @@ export default function HomePage() {
 
   const togglePublish = async (p) => {
     try {
-      await axios.put(`${API_URL}/api/products/${p._id}`, { ...p, isPublished: !p.isPublished });
+      const token = localStorage.getItem("token");
+      const isCurrentlyPublished = String(p.isPublished) === "true";
+      await axios.put(`${API_URL}/api/products/${p._id}`, { ...p, isPublished: !isCurrentlyPublished }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       fetchProducts();
     } catch (err) {
       console.error(err);
@@ -99,8 +114,15 @@ export default function HomePage() {
     });
   };
 
-  const publishedProducts = products.filter(p => p.isPublished);
-  const unpublishedProducts = products.filter(p => !p.isPublished);
+  const removeEditImage = (indexToRemove) => {
+    setEditData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== indexToRemove)
+    }));
+  };
+
+  const publishedProducts = products.filter(p => String(p.isPublished) === "true");
+  const unpublishedProducts = products.filter(p => String(p.isPublished) !== "true");
 
   const displayedProducts = activeTab === "Published" ? publishedProducts : unpublishedProducts;
 
@@ -109,40 +131,71 @@ export default function HomePage() {
       <style>{`
         .products-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 24px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: .75rem;
           width: 100%;
           padding: 24px;
         }
         .product-card {
           background: #fff;
-          border-radius: 12px;
+          border-radius: 18px;
           border: 1px solid #e5e7eb;
           padding: 20px;
           display: flex;
           flex-direction: column;
+          box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02);
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05);
         }
         .product-image-container {
           width: 100%;
-          height: 200px;
-          border-radius: 8px;
+          aspect-ratio: 16/10;
+          overflow: hidden;
+          border-radius: 12px;
+          margin-bottom: 16px;
+          background: #f9fafb;
           border: 1px solid #f3f4f6;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 16px;
-          overflow: hidden;
+          position: relative;
         }
         .product-image-container img {
-          max-width: 100%;
-          max-height: 100%;
+          width: 100%;
+          height: 100%;
           object-fit: contain;
         }
+        .carousel-dots {
+          position: absolute;
+          bottom: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          gap: 6px;
+          background: rgba(255, 255, 255, 0.7);
+          padding: 4px 8px;
+          border-radius: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .carousel-dots .dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #d1d5db;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .carousel-dots .dot.active {
+          background: #ff6b00;
+        }
         .product-title {
-          font-weight: 600;
           font-size: 16px;
+          font-weight: 700;
           color: #111827;
-          margin-bottom: 16px;
+          margin-bottom: 12px;
         }
         .product-detail-row {
           display: flex;
@@ -151,49 +204,66 @@ export default function HomePage() {
           margin-bottom: 8px;
         }
         .product-detail-label {
-          color: #6b7280;
+          color: #8a94a6;
         }
         .product-detail-val {
-          color: #111827;
-          font-weight: 500;
+          color: #374151;
+          font-weight: 600;
         }
         .product-actions {
           display: flex;
-          gap: 12px;
-          margin-top: auto;
-          padding-top: 16px;
+          gap: 10px;
+          margin-top: 16px;
         }
         .btn-publish {
-          flex: 1;
-          background: #2563EB;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          font-weight: 500;
-          cursor: pointer;
+          flex: 1.2;
           height: 40px;
+          border-radius: 8px;
+          border: none;
+          font-weight: 600;
+          font-size: 14px;
+          color: #fff;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .btn-publish.unpublished {
+          background: #2438F5;
+        }
+        .btn-publish.published {
+          background: #4ece0c;
         }
         .btn-edit {
-          flex: 1;
-          background: white;
-          color: #374151;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-weight: 500;
-          cursor: pointer;
+          flex: 1.2;
           height: 40px;
+          border-radius: 8px;
+          border: 1px solid #d1d5db;
+          background: #fff;
+          color: #374151;
+          font-weight: 600;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        .btn-edit:hover {
+          background: #f9fafb;
         }
         .btn-delete {
           width: 40px;
           height: 40px;
-          background: white;
-          color: #9ca3af;
+          border-radius: 8px;
           border: 1px solid #d1d5db;
-          border-radius: 6px;
+          background: #fff;
+          color: #9ca3af;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
+          transition: background 0.2s;
+        }
+        .btn-delete:hover {
+          background: #f9fafb;
+          color: #ef4444;
+          border-color: #fca5a5;
         }
         .modal-overlay {
           position: fixed;
@@ -249,7 +319,7 @@ export default function HomePage() {
             <button className="nav-btn active">
               <Home size={18} /> Home
             </button>
-            <button className="nav-btn" onClick={() => navigate("/product-details")}>
+            <button className="nav-btn" onClick={() => navigate("/products")}>
               <ShoppingBag size={18} /> Products
             </button>
           </nav>
@@ -287,33 +357,83 @@ export default function HomePage() {
           <div style={{ flex: 1, overflowY: 'auto' }}>
             {displayedProducts.length > 0 ? (
               <div className="products-grid">
-                {displayedProducts.map((p) => (
-                  <div key={p._id} className="product-card">
-                    <div className="product-image-container">
-                      <img src={p.images && p.images.length > 0 ? p.images[0] : "https://via.placeholder.com/150"} alt="product" />
-                    </div>
-                    <div className="product-title">{p.productName}</div>
-                    <div className="product-detail-row"><span className="product-detail-label">Product type</span><span className="product-detail-val">{p.productType}</span></div>
-                    <div className="product-detail-row"><span className="product-detail-label">Quantity Stock</span><span className="product-detail-val">{p.quantityStock}</span></div>
-                    <div className="product-detail-row"><span className="product-detail-label">MRP</span><span className="product-detail-val">₹ {p.mrp}</span></div>
-                    <div className="product-detail-row"><span className="product-detail-label">Selling Price</span><span className="product-detail-val">₹ {p.sellingPrice}</span></div>
-                    <div className="product-detail-row"><span className="product-detail-label">Brand Name</span><span className="product-detail-val">{p.brandName}</span></div>
-                    <div className="product-detail-row"><span className="product-detail-label">Total Number of images</span><span className="product-detail-val">{p.images?.length || 0}</span></div>
-                    <div className="product-detail-row"><span className="product-detail-label">Exchange Eligibility</span><span className="product-detail-val">{p.returnEligibility?.toUpperCase() || 'YES'}</span></div>
-
-                    <div className="product-actions">
-                      <button 
-                        className="btn-publish" 
-                        style={{ background: p.isPublished ? '#22c55e' : '#2563EB' }} 
-                        onClick={() => togglePublish(p)}
+                {displayedProducts.map((p) => {
+                  const images = p.images && p.images.length > 0 ? p.images : ["https://via.placeholder.com/150"];
+                  const activeImg = carouselIndices[p._id] || 0;
+                  return (
+                    <div key={p._id} className="product-card">
+                      <div
+                        className="product-image-container"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => navigate('/product-details', { state: { product: p } })}
                       >
-                        {p.isPublished ? "Unpublish" : "Publish"}
-                      </button>
-                      <button className="btn-edit" onClick={() => handleEditClick(p)}>Edit</button>
-                      <button className="btn-delete" onClick={() => handleDeleteClick(p)}><Trash2 size={18} /></button>
+                        <img src={images[activeImg]} alt="product" />
+                        {images.length > 1 && (
+                          <div className="carousel-dots">
+                            {images.map((_, idx) => (
+                              <span
+                                key={idx}
+                                className={`dot ${idx === activeImg ? 'active' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCarouselIndices(prev => ({ ...prev, [p._id]: idx }));
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div
+                        className="product-title"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => navigate('/product-details', { state: { product: p } })}
+                      >
+                        {p.productName}
+                      </div>
+                      <div className="product-detail-row">
+                        <span className="product-detail-label">Product type -</span>
+                        <span className="product-detail-val">{p.productType}</span>
+                      </div>
+                      <div className="product-detail-row">
+                        <span className="product-detail-label">Quantity Stock -</span>
+                        <span className="product-detail-val">{p.quantityStock}</span>
+                      </div>
+                      <div className="product-detail-row">
+                        <span className="product-detail-label">MRP -</span>
+                        <span className="product-detail-val">₹ {p.mrp}</span>
+                      </div>
+                      <div className="product-detail-row">
+                        <span className="product-detail-label">Selling Price -</span>
+                        <span className="product-detail-val">₹ {p.sellingPrice}</span>
+                      </div>
+                      <div className="product-detail-row">
+                        <span className="product-detail-label">Brand Name -</span>
+                        <span className="product-detail-val">{p.brandName}</span>
+                      </div>
+                      <div className="product-detail-row">
+                        <span className="product-detail-label">Total Number of images -</span>
+                        <span className="product-detail-val">{p.images?.length || 0}</span>
+                      </div>
+                      <div className="product-detail-row">
+                        <span className="product-detail-label">Exchange Eligibility -</span>
+                        <span className="product-detail-val">
+                          .{p.returnEligibility ? p.returnEligibility.toUpperCase() : "YES"}
+                        </span>
+                      </div>
+
+                      <div className="product-actions">
+                        <button
+                          className={`btn-publish ${String(p.isPublished) === "true" ? 'published' : 'unpublished'}`}
+                          onClick={() => togglePublish(p)}
+                        >
+                          {String(p.isPublished) === "true" ? "Unpublish" : "Publish"}
+                        </button>
+                        <button className="btn-edit" onClick={() => handleEditClick(p)}>Edit</button>
+                        <button className="btn-delete" onClick={() => handleDeleteClick(p)}><Trash2 size={18} /></button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <section className="empty-state">
@@ -359,13 +479,39 @@ export default function HomePage() {
                 <label>Upload Product Images</label>
                 <div style={{ border: '1px dashed #d1d5db', borderRadius: '8px', padding: '32px', textAlign: 'center', color: '#6b7280', position: 'relative' }}>
                   {editData.images && editData.images.length > 0 ? (
-                    <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '10px' }}>
+                    <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', marginBottom: '10px', padding: '5px' }}>
                       {editData.images.map((img, i) => (
-                        <img key={i} src={img} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #e5e7eb' }} />
+                        <div key={i} style={{ position: 'relative', width: '60px', height: '60px', flexShrink: 0 }}>
+                          <img src={img} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #e5e7eb' }} />
+                          <button 
+                            type="button" 
+                            onClick={() => removeEditImage(i)} 
+                            style={{ 
+                              position: 'absolute', 
+                              top: '-6px', 
+                              right: '-6px', 
+                              background: '#ef4444', 
+                              color: '#fff', 
+                              border: 'none', 
+                              borderRadius: '50%', 
+                              width: '18px', 
+                              height: '18px', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center', 
+                              cursor: 'pointer', 
+                              fontSize: '10px',
+                              fontWeight: 'bold',
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
                       ))}
                     </div>
                   ) : (
-                    <p style={{marginBottom: '10px'}}>Enter Description</p>
+                    <p style={{ marginBottom: '10px' }}>No images uploaded</p>
                   )}
                   <label style={{ background: 'transparent', border: '1px solid #2563EB', color: '#2563EB', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', display: 'inline-block' }}>
                     Browse
@@ -398,11 +544,24 @@ export default function HomePage() {
             <div className="modal-body">
               <p style={{ color: '#4b5563', lineHeight: '1.5' }}>
                 Are you sure you really want to delete this Product <br />
-                <strong style={{color:'#111827'}}>"{deleteData.productName}"</strong> ?
+                <strong style={{ color: '#111827' }}>"{deleteData.productName}"</strong> ?
               </p>
             </div>
-            <div className="modal-footer" style={{ justifyContent: 'center' }}>
-              <button className="btn-blue" onClick={confirmDelete} style={{ width: '100%', background: '#2563EB' }}>Delete</button>
+            <div className="modal-footer" style={{ display: 'flex', gap: '12px', width: '100%', padding: '20px 24px' }}>
+              <button 
+                className="btn-edit" 
+                onClick={() => setShowDeleteModal(false)} 
+                style={{ flex: 1, height: '44px', borderRadius: '8px', border: '1px solid #d1d5db', background: '#fff', color: '#374151', cursor: 'pointer', fontWeight: '500' }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="btn-blue" 
+                onClick={confirmDelete} 
+                style={{ flex: 1, height: '44px', borderRadius: '8px', background: '#ef4444', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: '500' }}
+              >
+                Delete
+              </button>
             </div>
           </div>
         </div>

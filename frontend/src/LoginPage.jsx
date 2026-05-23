@@ -1,7 +1,7 @@
 import { API_URL } from './config';
 import loginBg from "./assets/img/login.png";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./LoginPage.css";
 
 
@@ -15,7 +15,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    if (!email) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       setError("Please enter your email or phone number");
       return;
     }
@@ -24,10 +25,10 @@ const Login = () => {
     setError("");
     
     try {
-      const res = await axios.post(`${API_URL}/api/login`, { email });
+      const res = await axios.post(`${API_URL}/api/login`, { email: trimmedEmail });
       
       // Navigate to OTP page, passing the email in state so we can verify it
-      navigate("/otp", { state: { email, mockOtp: res.data.mockOtp } });
+      navigate("/otp", { state: { email: trimmedEmail, mockOtp: res.data.mockOtp } });
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || "Failed to send OTP. Please try again.");
@@ -76,7 +77,7 @@ const Login = () => {
 
           <div className="signup-box">
             <p>Don't have a Productr Account</p>
-            <a href="/signup">SignUp Here</a>
+            <Link to="/signup">SignUp Here</Link>
           </div>
 
         </div>

@@ -3,7 +3,14 @@ const Product = require('../models/Product');
 // Create a Product
 exports.createProduct = async (req, res) => {
   try {
-    const newProduct = new Product(req.body);
+    const productData = { ...req.body };
+    productData.createdBy = req.userId;
+    if (productData.isPublished === undefined || productData.isPublished === null) {
+      productData.isPublished = false;
+    } else {
+      productData.isPublished = String(productData.isPublished) === "true";
+    }
+    const newProduct = new Product(productData);
     const savedProduct = await newProduct.save();
     res.status(201).json({ success: true, data: savedProduct });
   } catch (error) {
@@ -14,7 +21,7 @@ exports.createProduct = async (req, res) => {
 // Get all Products
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const products = await Product.find({ createdBy: req.userId });
     res.status(200).json({ success: true, data: products });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -24,9 +31,17 @@ exports.getProducts = async (req, res) => {
 // Update a Product
 exports.updateProduct = async (req, res) => {
   try {
-    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    const updateData = { ...req.body };
+    if (updateData.isPublished !== undefined && updateData.isPublished !== null) {
+      updateData.isPublished = String(updateData.isPublished) === "true";
+    }
+    const updatedProduct = await Product.findOneAndUpdate(
+      { _id: req.params.id, createdBy: req.userId },
+      updateData,
+      { new: true, runValidators: true }
+    );
     if (!updatedProduct) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
+      return res.status(404).json({ success: false, message: 'Product not found or unauthorized' });
     }
     res.status(200).json({ success: true, data: updatedProduct });
   } catch (error) {
@@ -37,9 +52,9 @@ exports.updateProduct = async (req, res) => {
 // Delete a Product
 exports.deleteProduct = async (req, res) => {
   try {
-    const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+    const deletedProduct = await Product.findOneAndDelete({ _id: req.params.id, createdBy: req.userId });
     if (!deletedProduct) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
+      return res.status(404).json({ success: false, message: 'Product not found or unauthorized' });
     }
     res.status(200).json({ success: true, message: 'Product deleted' });
   } catch (error) {

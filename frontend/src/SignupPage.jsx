@@ -1,7 +1,7 @@
 import { API_URL } from './config';
 import loginBg from "./assets/img/login.png";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "./LoginPage.css";
 import axios from "axios";
 import { Camera } from "lucide-react";
@@ -12,7 +12,7 @@ const SignupPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [profileImage, setProfileImage] = useState("https://i.pravatar.cc/150");
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -26,7 +26,10 @@ const SignupPage = () => {
   };
 
   const handleSignup = async () => {
-    if (!name || !email || !password) {
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    
+    if (!trimmedName || !trimmedEmail || !password) {
       setError("Please fill all required fields");
       return;
     }
@@ -34,16 +37,16 @@ const SignupPage = () => {
       setError("Passwords do not match");
       return;
     }
-    
+
     setLoading(true);
     setError("");
     try {
-      const res = await axios.post(`${API_URL}/api/signup`, { email, name, password, profileImage });
-      
+      const res = await axios.post(`${API_URL}/api/signup`, { email: trimmedEmail, name: trimmedName, password, profileImage });
+
       // Save image to local storage to persist locally
       localStorage.setItem("profileImage", profileImage);
 
-      navigate("/otp", { state: { email, mockOtp: res.data.mockOtp } });
+      navigate("/otp", { state: { email: trimmedEmail, mockOtp: res.data.mockOtp } });
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.error || "Failed to send OTP. Please try again.");
@@ -130,7 +133,7 @@ const SignupPage = () => {
 
           <div className="signup-box">
             <p>Already have a Productr Account?</p>
-            <a href="/">Login Here</a>
+            <Link to="/">Login Here</Link>
           </div>
 
         </div>

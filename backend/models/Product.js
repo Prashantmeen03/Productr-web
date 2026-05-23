@@ -10,7 +10,8 @@ const productSchema = new mongoose.Schema({
   description: { type: String },
   returnEligibility: { type: String, enum: ['Yes', 'No'], default: 'Yes' },
   isPublished: { type: Boolean, default: false },
-  images: { type: [String], default: [] }
+  images: { type: [String], default: [] },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);

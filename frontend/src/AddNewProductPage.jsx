@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Home,
-  Package,
+  ShoppingBag,
   Search,
   ChevronDown,
   X,
@@ -61,22 +61,34 @@ export default function AddNewProductPage() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      alert("Please fill in all required fields: " + Object.keys(newErrors).map(k => {
+        if (k === "productName") return "Product Name";
+        if (k === "productType") return "Product Type";
+        if (k === "quantityStock") return "Quantity Stock";
+        if (k === "mrp") return "MRP";
+        if (k === "sellingPrice") return "Selling Price";
+        if (k === "brandName") return "Brand Name";
+        return k;
+      }).join(", "));
       return;
     }
-    
+
     try {
       setLoading(true);
-      await axios.post(`${API_URL}/api/products`, {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(`${API_URL}/api/products`, {
         ...formData,
         quantityStock: Number(formData.quantityStock),
         mrp: Number(formData.mrp),
         sellingPrice: Number(formData.sellingPrice)
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setShowModal(false);
-      navigate("/products");
+      navigate("/products", { state: { showSuccessToast: true } });
     } catch (err) {
       console.error("Failed to add product:", err);
-      alert("Failed to add product");
+      alert("Failed to add product: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -146,8 +158,8 @@ export default function AddNewProductPage() {
             <button className="nav-btn" onClick={() => navigate("/home")}>
               <Home size={18} /> Home
             </button>
-            <button className="nav-btn active" onClick={() => navigate("/products")}>
-              <Package size={18} /> Products
+            <button className="nav-btn" onClick={() => navigate("/products")}>
+              <ShoppingBag size={18} /> Products
             </button>
           </nav>
         </aside>
@@ -155,7 +167,7 @@ export default function AddNewProductPage() {
         <main className="main-content">
           <header className="topbar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#4b5563', fontWeight: '500' }}>
-              <Package size={18} />
+              <ShoppingBag size={18} />
               <span>Products</span>
             </div>
             <div className="profile-box" onClick={() => navigate('/profile')}>
@@ -205,19 +217,19 @@ export default function AddNewProductPage() {
                   </div>
                   <div className="form-group-modal">
                     <label>Quantity Stock</label>
-                    <input name="quantityStock" type="number" value={formData.quantityStock} onChange={handleChange} placeholder="Total numbers of Stock available" />
+                    <input name="quantityStock" type="number" value={formData.quantityStock} onChange={handleChange} placeholder="Total numbers of Stock available" style={{ borderColor: errors.quantityStock ? 'red' : '#e5e7eb' }} />
                   </div>
                   <div className="form-group-modal">
                     <label>MRP</label>
-                    <input name="mrp" type="number" value={formData.mrp} onChange={handleChange} placeholder="0" />
+                    <input name="mrp" type="number" value={formData.mrp} onChange={handleChange} placeholder="0" style={{ borderColor: errors.mrp ? 'red' : '#e5e7eb' }} />
                   </div>
                   <div className="form-group-modal">
                     <label>Selling Price</label>
-                    <input name="sellingPrice" type="number" value={formData.sellingPrice} onChange={handleChange} placeholder="0" />
+                    <input name="sellingPrice" type="number" value={formData.sellingPrice} onChange={handleChange} placeholder="0" style={{ borderColor: errors.sellingPrice ? 'red' : '#e5e7eb' }} />
                   </div>
                   <div className="form-group-modal">
                     <label>Brand Name</label>
-                    <input name="brandName" value={formData.brandName} onChange={handleChange} placeholder="Brand" />
+                    <input name="brandName" value={formData.brandName} onChange={handleChange} placeholder="Brand" style={{ borderColor: errors.brandName ? 'red' : '#e5e7eb' }} />
                   </div>
                   <div className="form-group-modal">
                     <label>Upload Product Images</label>
@@ -229,7 +241,7 @@ export default function AddNewProductPage() {
                           ))}
                         </div>
                       ) : (
-                        <p style={{marginBottom: '10px'}}>Enter Description</p>
+                        <p style={{ marginBottom: '10px' }}>No images uploaded</p>
                       )}
                       <label style={{ background: 'transparent', border: '1px solid #2563EB', color: '#2563EB', fontWeight: '600', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>
                         Browse

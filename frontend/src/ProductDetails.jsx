@@ -679,7 +679,15 @@ export default function ProductDetails() {
           <div className="search-wrapper">
             <div className="search-box">
               <Search size={16} />
-              <input type="text" placeholder="Search" />
+              <input 
+                type="text" 
+                placeholder="Search" 
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    navigate('/products', { state: { search: e.target.value.trim() } });
+                  }
+                }}
+              />
             </div>
           </div>
           <div className="nav">
@@ -706,6 +714,11 @@ export default function ProductDetails() {
                   placeholder="Search products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchTerm.trim()) {
+                      navigate('/products', { state: { search: searchTerm.trim() } });
+                    }
+                  }}
                   style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: '14px', width: '250px', color: '#111827' }}
                 />
               </div>

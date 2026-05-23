@@ -88,7 +88,15 @@ export default function Profilepage() {
         <div className="search-wrapper">
           <div className="search-box">
             <Search size={18} />
-            <input type="text" placeholder="Search" />
+            <input 
+              type="text" 
+              placeholder="Search" 
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                  navigate('/products', { state: { search: e.target.value.trim() } });
+                }
+              }}
+            />
           </div>
         </div>
         <nav className="nav-links">

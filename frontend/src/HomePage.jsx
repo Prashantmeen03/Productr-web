@@ -21,6 +21,7 @@ export default function HomePage() {
   const profileImage = localStorage.getItem("profileImage") || "https://i.pravatar.cc/150";
 
   const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [carouselIndices, setCarouselIndices] = useState({});
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -121,8 +122,14 @@ export default function HomePage() {
     }));
   };
 
-  const publishedProducts = products.filter(p => String(p.isPublished) === "true");
-  const unpublishedProducts = products.filter(p => String(p.isPublished) !== "true");
+  const filteredProducts = products.filter(p =>
+    p.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.brandName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.productType?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const publishedProducts = filteredProducts.filter(p => String(p.isPublished) === "true");
+  const unpublishedProducts = filteredProducts.filter(p => String(p.isPublished) !== "true");
 
   const displayedProducts = activeTab === "Published" ? publishedProducts : unpublishedProducts;
 
@@ -312,7 +319,12 @@ export default function HomePage() {
           <div className="search-wrapper">
             <div className="search-box">
               <Search size={18} />
-              <input type="text" placeholder="Search" />
+              <input 
+                type="text" 
+                placeholder="Search" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
           </div>
           <nav className="nav-links">

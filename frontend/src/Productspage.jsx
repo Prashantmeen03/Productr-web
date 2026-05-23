@@ -17,12 +17,11 @@ export default function Productspage() {
   const navigate = useNavigate();
   const profileImage = localStorage.getItem("profileImage") || "https://i.pravatar.cc/150";
 
+  const location = useLocation();
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(location.state?.search || "");
   const [activeTab, setActiveTab] = useState("Published");
   const [carouselIndices, setCarouselIndices] = useState({});
-
-  const location = useLocation();
   const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
